@@ -80,12 +80,13 @@ Whether to discard word .docx after conversion
         docxNamingConvention = @{
             description = @'
 Whether to use name .docx files using page ID with last modified date epoch, or hierarchy
-1: Use page ID with last modified date epoch (recommended if you chose to use existing .docx files) - Default
+1: Use page ID with last modified date epoch
 2: Use hierarchy
+3: Use page ID and page name with last modified date epoch (recommended if you chose to use existing .docx files) - Default
 '@
             default = 1
-            value = 1
-            validateRange = 1,2
+            value = 3
+            validateRange = 1,3
         }
         prefixFolders = @{
             description = @'
@@ -855,8 +856,10 @@ Function New-SectionGroupConversionConfig {
                         $pageCfg['mediaPathPandoc'] = [io.path]::combine( $pageCfg['tmpPath'], 'media').Replace( [io.path]::DirectorySeparatorChar, '/' ) # Pandoc outputs paths in markdown with with front slahes after the supplied <mediaPath>, e.g. '<mediaPath>/media/image.png'. So let's use a front-slashed supplied mediaPath
                         $pageCfg['docxExportFilePath'] = if ($config['docxNamingConvention']['value'] -eq 1) {
                             [io.path]::combine( $cfg['notesDocxDirectory'], "$( $pageCfg['id'] )-$( $pageCfg['lastModifiedTimeEpoch'] ).docx" )
-                        }else {
+                        }elseif ($config['docxNamingConvention']['value'] -eq 2) {
                             [io.path]::combine( $cfg['notesDocxDirectory'], "$( $pageCfg['pathFromRootCompat'] ).docx" )
+                        }else {
+                            [io.path]::combine( $cfg['notesDocxDirectory'], "$( $pageCfg['id'] )-$( $pageCfg['lastModifiedTimeEpoch'] )-$( $pageCfg['nameCompat'] ).docx" )
                         }
                         $pageCfg['insertedAttachments'] = @(
                             & {
