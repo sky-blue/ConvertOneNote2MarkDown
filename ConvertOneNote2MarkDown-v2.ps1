@@ -108,6 +108,13 @@ Default: 32
             value = 32
             validateRange = 32,255
         }
+        mediaFolderName = @{
+            description = @'
+Specify a media folder name - Default: media
+'@
+            default = 'media'
+            value = 'media'
+        }
         medialocation = @{
             description = @'
 Whether to store media in single or multiple folders
@@ -725,7 +732,7 @@ Function New-SectionGroupConversionConfig {
                 # Build Section's pages
                 if (Get-Member -InputObject $section -Name 'Page') {
                     foreach ($page in $section.Page) {
-                        "$( '#' * ($LevelsFromRoot + 2) ) Building conversion configuration for $( $page.name ) [Page]" | Write-Host -ForegroundColor DarkGray
+                        "$( '#' * ($LevelsFromRoot + 2) ) Building conversion configuration for $( $page.name ) [Page] [$( Get-Date -Format "HH:mm:ss.fffffff" )]" | Write-Host -ForegroundColor DarkGray
 
                         $previousPage = if ($sectionCfg['pages'].Count -gt 0) { $sectionCfg['pages'][$sectionCfg['pages'].Count - 1] } else { $null }
                         $pageCfg = [ordered]@{}
@@ -851,7 +858,7 @@ Function New-SectionGroupConversionConfig {
                         }else {
                             $cfg['notesBaseDirectory']
                         }
-                        $pageCfg['mediaPath'] = [io.path]::combine( $pageCfg['mediaParentPath'], 'media' )
+                        $pageCfg['mediaPath'] = [io.path]::combine( $pageCfg['mediaParentPath'], $($config['mediaFolderName']['value']) )
                         $pageCfg['mediaParentPathPandoc'] = [io.path]::combine( $pageCfg['tmpPath'] ).Replace( [io.path]::DirectorySeparatorChar, '/' ) # Pandoc outputs paths in markdown with with front slahes after the supplied <mediaPath>, e.g. '<mediaPath>/media/image.png'. So let's use a front-slashed supplied mediaPath
                         $pageCfg['mediaPathPandoc'] = [io.path]::combine( $pageCfg['tmpPath'], 'media').Replace( [io.path]::DirectorySeparatorChar, '/' ) # Pandoc outputs paths in markdown with with front slahes after the supplied <mediaPath>, e.g. '<mediaPath>/media/image.png'. So let's use a front-slashed supplied mediaPath
                         $pageCfg['docxExportFilePath'] = if ($config['docxNamingConvention']['value'] -eq 1) {
@@ -1219,7 +1226,7 @@ Function Convert-OneNotePage {
                         "Mutation of markdown: Rename image references to unique name. Find '$( $image.Name )', Replacement: '$( $newimageName )'" | Write-Verbose
                         if ($config['dryRun']['value'] -eq 1) {
                             $content = Get-Content -LiteralPath $pageCfg['filePath'] -Raw -ErrorAction Stop # Use -LiteralPath so that characters like '(', ')', '[', ']', '`', "'", '"' are supported. Or else we will get an error "Cannot find path 'xxx' because it does not exist"
-                            $content = $content.Replace("$($image.Name)", "$($newimageName)")
+                            $content = $content.Replace("media/$($image.Name)", "$($config['mediaFolderName']['value'])/$($newimageName)")
                             Set-ContentNoBom -LiteralPath $pageCfg['filePath'] -Value $content -ErrorAction Stop # Use -LiteralPath so that characters like '(', ')', '[', ']', '`', "'", '"' are supported. Or else we will get an error "Cannot find path 'xxx' because it does not exist"
                         }
                     }catch {

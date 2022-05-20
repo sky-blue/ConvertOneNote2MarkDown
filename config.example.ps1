@@ -45,6 +45,9 @@ $prefixFolders = 1
 # Default: 32
 $mdFileNameAndFolderNameMaxLength = 32
 
+# Specify a media folder name - Default: media
+$mediaFolderName = 'media'
+
 # Whether to store media in single or multiple folders
 # 1: Images stored in single 'media' folder at Notebook-level - Default
 # 2: Separate 'media' folder for each folder in the hierarchy
