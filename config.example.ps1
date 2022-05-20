@@ -53,6 +53,12 @@ $mediaFolderName = 'media'
 # 2: Separate 'media' folder for each folder in the hierarchy
 $medialocation = 1
 
+# Specify image reference format
+# 1: HTML
+# 2: Markdown
+# 3: Obsidian Embed (https://obsidian.md/)
+$imageFormat = 3
+
 # Specify Pandoc output format and optional extensions in the format: <format><+extension><-extension>. See: https://pandoc.org/MANUAL.html#options
 # Examples:
 #   markdown-simple_tables-multiline_tables-grid_tables+pipe_tables

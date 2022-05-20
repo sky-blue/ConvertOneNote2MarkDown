@@ -125,6 +125,17 @@ Whether to store media in single or multiple folders
             value = 1
             validateRange = 1,2
         }
+        imageFormat = @{
+            description = @'
+Specify image reference format
+1: HTML
+2: Markdown
+3: Obsidian Embed (https://obsidian.md/)
+'@
+            default = 1
+            value = 1
+            validateRange = 1,3
+        }
         conversion = @{
             description = @'
 Specify Pandoc output format and optional extensions in the format: <format><+extension><-extension>. See: https://pandoc.org/MANUAL.html#options
@@ -1225,9 +1236,14 @@ Function Convert-OneNotePage {
                     try {
                         "Mutation of markdown: Rename image references to unique name. Find '$( $image.Name )', Replacement: '$( $newimageName )'" | Write-Verbose
                         if ($config['dryRun']['value'] -eq 1) {
-                            $content = Get-Content -LiteralPath $pageCfg['filePath'] -Raw -ErrorAction Stop # Use -LiteralPath so that characters like '(', ')', '[', ']', '`', "'", '"' are supported. Or else we will get an error "Cannot find path 'xxx' because it does not exist"
-                            $content = $content.Replace("media/$($image.Name)", "$($config['mediaFolderName']['value'])/$($newimageName)")
-                            Set-ContentNoBom -LiteralPath $pageCfg['filePath'] -Value $content -ErrorAction Stop # Use -LiteralPath so that characters like '(', ')', '[', ']', '`', "'", '"' are supported. Or else we will get an error "Cannot find path 'xxx' because it does not exist"
+                            # Use -LiteralPath so that characters like '(', ')', '[', ']', '`', "'", '"' are supported. Or else we will get an error "Cannot find path 'xxx' because it does not exist"
+                            if ($config['imageFormat']['value'] -eq 1) {
+                                (Get-Content -LiteralPath $pageCfg['filePath'] -ErrorAction Stop) -replace "media/$($image.Name)", "$($config['mediaFolderName']['value'])/$($newimageName)" | Set-Content -LiteralPath $pageCfg['filePath'] -ErrorAction Stop
+                            }elseif ($config['imageFormat']['value'] -eq 2) {
+                                (Get-Content -LiteralPath $pageCfg['filePath'] -ErrorAction Stop) -replace "<img.*?$($image.Name).*?>", "![img]($newimageName)" | Set-Content -LiteralPath $pageCfg['filePath'] -ErrorAction Stop
+                            }else {
+                                (Get-Content -LiteralPath $pageCfg['filePath'] -ErrorAction Stop) -replace "<img.*?$($image.Name).*?>", "![[$newimageName]]" | Set-Content -LiteralPath $pageCfg['filePath'] -ErrorAction Stop
+                            }
                         }
                     }catch {
                         Write-Error "Error while renaming image file name references to '$( $newimageName ): $( $_.Exception.Message )"
