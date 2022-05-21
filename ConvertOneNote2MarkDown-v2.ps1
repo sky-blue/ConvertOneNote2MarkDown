@@ -743,7 +743,8 @@ Function New-SectionGroupConversionConfig {
                 # Build Section's pages
                 if (Get-Member -InputObject $section -Name 'Page') {
                     foreach ($page in $section.Page) {
-                        "$( '#' * ($LevelsFromRoot + 2) ) Building conversion configuration for $( $page.name ) [Page] [$( Get-Date -Format "HH:mm:ss.fffffff" )]" | Write-Host -ForegroundColor DarkGray
+                        "[$( Get-Date -Format "HH:mm:ss.fffffff" )]" | Write-Host -ForegroundColor DarkGray
+                        "$( '#' * ($LevelsFromRoot + 2) ) Building conversion configuration for $( $page.name ) [Page]" | Write-Host -ForegroundColor DarkGray
 
                         $previousPage = if ($sectionCfg['pages'].Count -gt 0) { $sectionCfg['pages'][$sectionCfg['pages'].Count - 1] } else { $null }
                         $pageCfg = [ordered]@{}
